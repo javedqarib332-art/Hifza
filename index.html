@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hifza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,600&family=Dancing+Script:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink-1:#FFE3EE;
+    --pink-2:#FFB8D2;
+    --pink-3:#FF6FA5;
+    --pink-4:#D6336C;
+    --pink-5:#8A2856;
+    --plum:#4A1942;
+    --plum-soft:#7A4A6E;
+    --gold:#FFC94D;
+    --white:#FFFDFE;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; height:100%;
+    background: radial-gradient(circle at 20% 0%, #FFEFF6 0%, var(--pink-1) 45%, #FFD9E9 100%);
+    color: var(--plum);
+    font-family:'Poppins', sans-serif;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{ font-family:'Playfair Display', serif; margin:0; }
+  .signature{ font-family:'Dancing Script', cursive; }
+
+  /* ---------- animated background layer ---------- */
+  #bgLayer{
+    position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden;
+  }
+  .float-h{
+    position:absolute;
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    color: var(--pink-4);
+    opacity:0.13;
+    user-select:none;
+    filter: drop-shadow(0 6px 10px rgba(214,51,108,0.12));
+    animation: driftRotate linear infinite;
+  }
+  @keyframes driftRotate{
+    0%{   transform: translate(0,0) rotate(-6deg) scale(1); }
+    25%{  transform: translate(10px,-22px) rotate(3deg) scale(1.05); }
+    50%{  transform: translate(-6px,-46px) rotate(-4deg) scale(0.97); }
+    75%{  transform: translate(-14px,-20px) rotate(5deg) scale(1.03); }
+    100%{ transform: translate(0,0) rotate(-6deg) scale(1); }
+  }
+
+  .sparkle{
+    position:absolute;
+    color: var(--gold);
+    opacity:0;
+    animation: twinkle ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{ opacity:0; transform: scale(0.6) rotate(0deg); }
+    50%{ opacity:0.85; transform: scale(1.15) rotate(25deg); }
+  }
+
+  .bear{
+    position:absolute;
+    bottom:-60px;
+    font-size: 22px;
+    opacity:0.55;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp{
+    0%{   transform: translateY(0) translateX(0) rotate(-8deg); opacity:0; }
+    8%{   opacity:0.55; }
+    50%{  transform: translateY(-55vh) translateX(18px) rotate(8deg); }
+    92%{  opacity:0.5; }
+    100%{ transform: translateY(-112vh) translateX(-10px) rotate(-8deg); opacity:0; }
+  }
+
+  .corner-bear{
+    position:fixed;
+    font-size: 64px;
+    z-index:0;
+    pointer-events:none;
+    filter: drop-shadow(0 10px 14px rgba(122,74,110,0.25));
+    animation: rock 3.6s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+  #bearLeft{ left:-6px; bottom:-4px; }
+  #bearRight{ right:-10px; bottom:-8px; animation-delay: 1.1s; transform: scaleX(-1); }
+  @keyframes rock{
+    0%,100%{ transform: rotate(-5deg); }
+    50%{ transform: rotate(5deg); }
+  }
+  #bearRight{ }
+  #bearRight.rocking{ animation: rockFlip 3.6s ease-in-out infinite 1.1s; }
+  @keyframes rockFlip{
+    0%,100%{ transform: scaleX(-1) rotate(-5deg); }
+    50%{ transform: scaleX(-1) rotate(5deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .float-h,.sparkle,.bear,.corner-bear{ animation:none !important; opacity:0.1; }
+  }
+  @media (max-width: 640px){
+    .corner-bear{ font-size:44px; }
+  }
+
+  /* ---------- layout ---------- */
+  .app{
+    position:relative; z-index:1;
+    min-height:100vh;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    display:flex; flex-direction:column;
+  }
+
+  .screen{
+    display:none;
+    flex:1;
+    align-items:center;
+    justify-content:center;
+    padding: 48px 22px 96px;
+    min-height: 100svh;
+  }
+  .screen.active{
+    display:flex;
+    animation: fadeSlide 0.75s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes fadeSlide{
+    from{ opacity:0; transform: translateY(22px) scale(0.985); }
+    to{ opacity:1; transform: translateY(0) scale(1); }
+  }
+
+  .card{
+    position:relative;
+    width:100%;
+    max-width: 620px;
+    background: rgba(255,255,255,0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 30px;
+    padding: 46px 38px;
+    box-shadow: 0 24px 70px rgba(138,40,86,0.22), inset 0 0 0 1.5px rgba(255,255,255,0.9);
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset:-2px;
+    border-radius:32px;
+    padding:2px;
+    background: linear-gradient(135deg, var(--pink-2), var(--gold), var(--pink-4));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity:0.6;
+    z-index:-1;
+  }
+
+  .brand{
+    position:relative;
+    width:78px; height:78px;
+    margin: 0 auto 22px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    background: linear-gradient(135deg, var(--pink-3), var(--pink-4));
+    box-shadow: 0 12px 28px rgba(214,51,108,0.38);
+  }
+  .brand span{
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    font-size: 2.1rem;
+    color:#fff;
+  }
+  .brand::after{
+    content:"";
+    position:absolute; inset:-9px;
+    border-radius:50%;
+    border:1.5px dashed var(--pink-2);
+    animation: spin 14s linear infinite;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){ .brand::after{ animation:none; } }
+
+  h1.headline{
+    font-size: clamp(1.7rem, 6vw, 2.5rem);
+    text-align:center;
+    line-height:1.25;
+    color: var(--plum);
+    margin-bottom: 6px;
+  }
+  h2.subhead{
+    text-align:center;
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-weight:500;
+    color: var(--pink-4);
+    font-size: 1.1rem;
+    margin-bottom: 26px;
+  }
+
+  p.body-text{
+    font-size: 1.02rem;
+    line-height:1.85;
+    color: var(--plum-soft);
+    margin: 0 0 18px;
+  }
+  p.body-text:last-of-type{ margin-bottom: 0; }
+
+  .name-form{
+    display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+    margin-top: 8px;
+  }
+  input[type=text]{
+    flex:1; min-width: 200px;
+    font-family:'Poppins', sans-serif;
+    font-size:1rem;
+    padding: 13px 18px;
+    border-radius: 999px;
+    border: 1.5px solid var(--pink-2);
+    background: #fff;
+    color: var(--plum);
+    outline:none;
+  }
+  input[type=text]:focus{ border-color: var(--pink-4); }
+
+  .actions{
+    display:flex; justify-content:center;
+    margin-top: 30px;
+  }
+  button.next-btn{
+    font-family:'Poppins', sans-serif;
+    font-weight:500;
+    font-size: 0.98rem;
+    color:#fff;
+    background: linear-gradient(135deg, var(--pink-3), var(--pink-4));
+    border:none;
+    padding: 14px 34px;
+    border-radius: 999px;
+    cursor:pointer;
+    box-shadow: 0 10px 24px rgba(214,51,108,0.32);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  button.next-btn:hover{ transform: translateY(-2px); box-shadow: 0 16px 32px rgba(214,51,108,0.42); }
+  button.next-btn:active{ transform: translateY(0) scale(0.97); }
+  button.next-btn:focus-visible, input:focus-visible{
+    outline: 2px solid var(--pink-4); outline-offset:3px;
+  }
+
+  .dots{
+    position:fixed; left:0; right:0; bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    display:flex; justify-content:center; gap:8px; z-index:2;
+  }
+  .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--pink-2);
+    transition: background 0.25s ease, transform 0.25s ease;
+  }
+  .dot.active{ background: var(--pink-4); transform: scale(1.35); }
+
+  .final-mark{
+    text-align:center;
+    font-size: 2.4rem;
+    margin-bottom: 8px;
+  }
+
+  .end-note{
+    text-align:center;
+    font-size:0.9rem;
+    color: var(--plum-soft);
+    margin-top:20px;
+  }
+
+  @media (max-width:480px){
+    .card{ padding: 34px 22px; border-radius:24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="bgLayer">
+  <span class="corner-bear" id="bearLeft">🧸</span>
+  <span class="corner-bear" id="bearRight">🧸</span>
+</div>
+
+<div class="app">
+
+  <!-- Screen 0: reveal + name (Urdu) -->
+  <section class="screen active" id="screen0">
+    <div class="card">
+      <div class="brand"><span>H</span></div>
+      <h1 class="headline">Arre... dekho to kon aya hai 👀</h1>
+      <h2 class="subhead">pehle ye batao, ap kon hain?</h2>
+      <div class="name-form">
+        <input type="text" id="nameInput" placeholder="apna naam likhen..." maxlength="20">
+      </div>
+      <div class="actions">
+        <button class="next-btn" onclick="goName()">Aagay chalte hain</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 1: welcome (Urdu) -->
+  <section class="screen" id="screen1">
+    <div class="card">
+      <div class="brand"><span>H</span></div>
+      <h1 class="headline" id="s1-title">Aryyy! Dekho to kon aya hai, mashallah mashallah! 🌸</h1>
+      <p class="body-text">Aur kaise hain aap? Tabiyat kaisi hai? Aur gussa kaisa hai, kam hua ya abhi bhi utna hi hai???</p>
+      <p class="body-text">Dekho, ye website aapke liye banayi hai, chalo isko pura explore karte hain.</p>
+      <div class="actions">
+        <button class="next-btn" onclick="showScreen(2)">Chalo aur aagay chalte hain</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 2: English from here on -->
+  <section class="screen" id="screen2">
+    <div class="card">
+      <h2 class="subhead">why so angry?</h2>
+      <p class="body-text" id="s2-text"></p>
+      <div class="actions">
+        <button class="next-btn" onclick="showScreen(3)">Let's get into it</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 3: Your Value -->
+  <section class="screen" id="screen3">
+    <div class="card">
+      <h1 class="headline">your value</h1>
+      <div id="s3-text"></div>
+      <div class="actions">
+        <button class="next-btn" onclick="showScreen(4)">Let's head toward the end</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 4 -->
+  <section class="screen" id="screen4">
+    <div class="card">
+      <div id="s4-text"></div>
+      <div class="actions">
+        <button class="next-btn" onclick="showScreen(5)">Lastly</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 5: final -->
+  <section class="screen" id="screen5">
+    <div class="card">
+      <div class="final-mark">🎀</div>
+      <div id="s5-text"></div>
+      <p class="signature" style="font-size:1.4rem; text-align:center; margin-top:22px; color:var(--pink-4);" id="s5-signoff"></p>
+      <div class="actions">
+        <button class="next-btn" onclick="finish()">Allah Hafiz Qarib</button>
+      </div>
+      <p class="end-note">click to start over from the beginning</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="dots" id="dots"></div>
+
+<script>
+  let userName = "Hifza";
+  const totalScreens = 6;
+
+  const content = {
+    s1title: (n) => `Aryyy! Dekho to kon aya hai, mashallah mashallah! 🌸`,
+    s2: (n) => `${n}, what happened? Why so angry? And what exactly happened that changed your whole behaviour, just like that? This action of yours has disturbed me a lot, I genuinely have no idea what happened. And you're not even willing to tell me over message. And I can't just leave you disturbed like this, that's a separate thing, you might not show it, but I can feel it.`,
+    s3: (n) => [
+      `${n}, first of all, there's an ethic and a rule here: if someone values you, it's your duty to appreciate that and respect it. And you hold an extreme amount of value here, more than I can even put into words.`,
+      `There's no special reason for it. It's simply that I don't trust people easily. Actually, I don't trust people at all. I've known you for 4 years now, and in my mind you're a genuinely good person, that's why you have this much respect from me, and that will never change.`,
+      `Now if you hear something from a third person and immediately make a decision about it, that's not right, and it's not fair either. Look, no matter how big the issue is, nothing gets resolved without communicating, that's just how it works. And if you trust me even a little, you should come and clear it up yourself. And if something I said hurt you, tell me, I'm always here to apologise. But I need to know what actually happened.`,
+      `One of the reasons I talk to you is also this. I told you before, I don't really have friends. I mean, I have people around, but no one who truly listens. And with how demanding my routine is, a person can go a little crazy with it. That's why you're the best healer, you know how to listen.`,
+      `And you can probably tell yourself how special you are and how valued you are. I have no ego in front of you, otherwise I have an extraordinarily large one, just not for you.`,
+      `And who makes decisions this fast, that it's either this or nothing at all? How does that even work? No one knows what's ahead, chasing your dream job is a whole process, and yet this is how it usually goes...`,
+      `Now you'll say, I know myself, I treat everyone according to how they are with me,`,
+      `That's not how it works. You have to change how you think, and you can't measure everything the same way, or you'll spend your whole life going by the wrong measurements.`
+    ],
+    s4: (n) => [
+      `${n}, look, I still don't know what happened. This much I know: you made up your mind after listening to what other people said. Now you'll say that's not true, that you know exactly what you're doing, but this is the reality.`,
+      `Whatever you say now, and yes, 100%, something I said must have hurt you too. I just don't know which part.`,
+      `I'm really sorry, I don't know what I might have said and when. I talk to you very openly, thinking you won't mind whatever I say. Maybe that's why I said more than I should have. Again, sorry.`
+    ],
+    s5: (n) => [
+      `I hope you liked this website. I wasn't feeling well, and I'd finished studying too, so I thought I'd make this for you. Let me know how it turned out.`,
+      `And ${n}, decisions like this shouldn't be made so quickly in life. No matter how clear you are about your choices, your personality, your conscience, this still isn't the way to do it, it doesn't hold up long-term. If you can, please tell me the reason.`,
+      `May Allah always keep you happy.`
+    ],
+    s5signoff: (n) => `Allah Hafiz, ${n}.`
+  };
+
+  function renderParas(container, arr){
+    container.innerHTML = arr.map(t => `<p class="body-text">${t}</p>`).join("");
+  }
+
+  function goName(){
+    const val = document.getElementById('nameInput').value.trim();
+    if(val) userName = val;
+    document.getElementById('s1-title').textContent = content.s1title(userName);
+    document.getElementById('s2-text').textContent = content.s2(userName);
+    renderParas(document.getElementById('s3-text'), content.s3(userName));
+    renderParas(document.getElementById('s4-text'), content.s4(userName));
+    renderParas(document.getElementById('s5-text'), content.s5(userName));
+    document.getElementById('s5-signoff').textContent = content.s5signoff(userName);
+    showScreen(1);
+  }
+
+  function showScreen(i){
+    for(let k=0;k<totalScreens;k++){
+      document.getElementById('screen'+k).classList.toggle('active', k===i);
+    }
+    updateDots(i);
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  function updateDots(active){
+    const dots = document.getElementById('dots');
+    dots.innerHTML = '';
+    for(let k=0;k<totalScreens;k++){
+      const d = document.createElement('div');
+      d.className = 'dot' + (k===active ? ' active' : '');
+      dots.appendChild(d);
+    }
+  }
+  updateDots(0);
+
+  function finish(){
+    showScreen(0);
+    document.getElementById('nameInput').value = '';
+  }
+
+  // ---------- animated background: H letters, sparkles, floating teddy bears ----------
+  (function initBg(){
+    const layer = document.getElementById('bgLayer');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById('bearRight').classList.add('rocking');
+
+    for(let i=0;i<7;i++){
+      const h = document.createElement('div');
+      h.className = 'float-h';
+      h.textContent = 'H';
+      h.style.left = (Math.random()*90)+'vw';
+      h.style.top = (Math.random()*88)+'vh';
+      h.style.fontSize = (60 + Math.random()*100)+'px';
+      h.style.animationDuration = (9 + Math.random()*9)+'s';
+      layer.appendChild(h);
+    }
+
+    if(!reduce){
+      for(let i=0;i<9;i++){
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.textContent = '✨';
+        s.style.left = (Math.random()*95)+'vw';
+        s.style.top = (Math.random()*90)+'vh';
+        s.style.fontSize = (14 + Math.random()*16)+'px';
+        s.style.animationDuration = (2.4 + Math.random()*2.6)+'s';
+        s.style.animationDelay = (Math.random()*4)+'s';
+        layer.appendChild(s);
+      }
+      for(let i=0;i<8;i++){
+        const b = document.createElement('div');
+        b.className = 'bear';
+        b.textContent = '🧸';
+        b.style.left = (Math.random()*94)+'vw';
+        b.style.fontSize = (18 + Math.random()*20)+'px';
+        b.style.animationDuration = (11 + Math.random()*10)+'s';
+        b.style.animationDelay = (Math.random()*12)+'s';
+        layer.appendChild(b);
+      }
+    }
+  })();
+
+  document.getElementById('nameInput').addEventListener('keydown', function(e){
+    if(e.key === 'Enter') goName();
+  });
+</script>
+</body>
+</html>
